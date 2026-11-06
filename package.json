@@ -1,0 +1,28 @@
+{
+  "name": "book-nest",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "check": "tsc --noEmit",
+    "test:scoring": "tsx scripts/check-scoring.ts"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "next": "^15.5.29",
+    "pg": "^8.16.3",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^22.17.2",
+    "@types/pg": "^8.15.5",
+    "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.1.9",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.2"
+  }
+}
