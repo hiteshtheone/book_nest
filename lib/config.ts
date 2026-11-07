@@ -1,7 +1,3 @@
-export const SAMPLE_ORGANIZER_NAME = "organizer";
-export const SAMPLE_ORGANIZER_PASSWORD = "1z835v003e1f";
-export const SAMPLE_READER_PASSWORD = "readtogether";
-
 export function databaseUrl(): string | undefined {
   const url = process.env.DATABASE_URL?.trim();
   return url ? url : undefined;

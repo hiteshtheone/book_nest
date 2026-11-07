@@ -49,6 +49,7 @@ export default async function DashboardPage() {
             <h2>JBN Dynamic Duo</h2>
             <p className="intro">Pair standings, including organizer adjustments.</p>
             <ol className="ranks">
+              {board.pairs.length === 0 ? <li className="empty">No pairs yet.</li> : null}
               {board.pairs.map((pair, index) => (
                 <li key={pair.id}>
                   <span className="rank">{index + 1}</span>

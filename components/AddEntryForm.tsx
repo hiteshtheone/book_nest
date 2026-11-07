@@ -5,9 +5,9 @@ import { addEntry, type ActionState } from "@/app/actions";
 import type { Kind } from "@/lib/scoring";
 
 const hints: Record<Kind, string> = {
-  currently_reading: "Say who is reading it. This scores 0 and shows on the public feed.",
+  currently_reading: "Say who is reading it. After the pair’s first entry, this scores 0 and shows on the public feed.",
   kickoff: "An intro plus the books you are starting. 2 points, once per pair, 1–8 Nov 2026 (UTC).",
-  finished: "A 2–5 line review. 1 point, or 2 when the copy was borrowed from Jade Book Nest.",
+  finished: "A 2–5 line review. 1 point, or 2 when it is from the Jade Book Nest library.",
   best: "One recommendation per pair, worth 2 points, 25–31 Dec 2026 (UTC).",
 };
 
@@ -41,13 +41,11 @@ export function AddEntryForm({ defaultWho }: { defaultWho: string }) {
         <span>Words</span>
         <textarea name="body" className="words" rows={4} required={kind !== "currently_reading"} />
       </label>
-      {kind === "finished" ? (
-        <label className="check">
-          <input type="checkbox" name="borrowed" />
-          <span>Borrowed from Jade Book Nest</span>
-        </label>
-      ) : null}
-      <p className="hint">{hints[kind]}</p>
+      <label className="check">
+        <input type="checkbox" name="borrowed" />
+        <span>From the Jade Book Nest library</span>
+      </label>
+      <p className="hint">The first entry a pair saves is worth 2 points, once. {hints[kind]}</p>
       <button className="button wide" type="submit" disabled={pending}>
         {pending ? "Saving…" : "Save entry"}
       </button>

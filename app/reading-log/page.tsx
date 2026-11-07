@@ -35,7 +35,7 @@ export default async function ReadingLogPage() {
             <article className="card">
               <h2 className="points-total">{pair.pointsLabel}</h2>
               <p className="hint">
-                Same title once. A Jade Book Nest borrow makes that title 2 points. Entries outside a window stay in the log and score 0.
+                The first entry a pair saves is worth 2 points, once. After that, a finished book is 1 point, or 2 from the Jade Book Nest library. The same title counts once. Entries outside a window stay in the log and score 0.
               </p>
             </article>
             {scored.length === 0 ? <p className="empty">No entries yet.</p> : null}

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { SAMPLE_ORGANIZER_NAME, SAMPLE_ORGANIZER_PASSWORD, adminConfigured } from "@/lib/config";
 
 const rules = [
   {
@@ -16,11 +15,11 @@ const rules = [
   },
   {
     title: "Same book, once",
-    body: "The same title on a pair counts once. If either copy was borrowed from Jade Book Nest, that book is worth 2.",
+    body: "The same title on a pair counts once. A finished copy from the Jade Book Nest library is worth 2.",
   },
   {
-    title: "JBN borrows worth more",
-    body: "A finished book is 1 point, or 2 when it was borrowed from Jade Book Nest.",
+    title: "JBN library worth more",
+    body: "A finished book is 1 point, or 2 when it is from the Jade Book Nest library.",
   },
   {
     title: "Outside the window",
@@ -31,15 +30,6 @@ const rules = [
 export default function HomePage() {
   return (
     <main className="wrap">
-      {adminConfigured() ? null : (
-        <aside className="sample">
-          <p className="sample-title">Sample data</p>
-          <p>Sample organizer. The admin is not configured, so this labeled sample account can edit entries.</p>
-          <p>Name {SAMPLE_ORGANIZER_NAME}</p>
-          <p>Password {SAMPLE_ORGANIZER_PASSWORD}</p>
-        </aside>
-      )}
-
       <section className="hero">
         <div>
           <p className="eyebrow">Reading Challenge 2026</p>
@@ -69,6 +59,13 @@ export default function HomePage() {
       <article className="card how">
         <h2>How points work</h2>
         <div className="point-row">
+          <span className="point-badge two">2</span>
+          <div>
+            <div className="point-title">First entry</div>
+            <p>The first entry a pair saves is worth 2 points, once. Later entries follow the rules below.</p>
+          </div>
+        </div>
+        <div className="point-row">
           <span className="point-badge zero">0</span>
           <div>
             <div className="point-title">Currently reading</div>
@@ -86,7 +83,7 @@ export default function HomePage() {
           <span className="point-badge one">1</span>
           <div>
             <div className="point-title">Finished book</div>
-            <p>A 2–5 line review. 2 points instead of 1 when the copy was borrowed from Jade Book Nest.</p>
+            <p>A 2–5 line review. 2 points instead of 1 when the copy is from the Jade Book Nest library.</p>
           </div>
         </div>
         <div className="point-row">

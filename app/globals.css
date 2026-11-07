@@ -328,6 +328,8 @@ h1 {
 
 .ranks li:last-child { margin-bottom: 0; }
 
+.ranks li.empty { display: block; }
+
 .rank { color: #a07c38; font-weight: 750; padding-top: 1px; }
 
 .rank-name { font-weight: 750; }

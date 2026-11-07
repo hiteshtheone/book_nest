@@ -122,7 +122,7 @@ export async function addEntry(_prev: ActionState, formData: FormData): Promise<
     kind: kindRaw,
     title,
     body,
-    borrowed: kindRaw === "finished" && formData.get("borrowed") === "on",
+    borrowed: formData.get("borrowed") === "on",
     createdAt: new Date().toISOString(),
   });
   revalidatePath("/reading-log");

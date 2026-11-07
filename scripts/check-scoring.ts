@@ -43,15 +43,44 @@ const best: ScoreInput = {
   createdAt: "2026-11-06T12:00:00.000Z",
 };
 
+const reading: ScoreInput = {
+  id: "now",
+  kind: "currently_reading",
+  title: "Earthsea",
+  borrowed: false,
+  createdAt: "2026-11-06T05:00:00.000Z",
+};
+const libraryBook: ScoreInput = {
+  id: "lib",
+  kind: "finished",
+  title: "Pippi Longstocking",
+  borrowed: true,
+  createdAt: "2026-11-06T06:00:00.000Z",
+};
+const ownCopy: ScoreInput = {
+  id: "own",
+  kind: "finished",
+  title: "Charlotte's Web",
+  borrowed: false,
+  createdAt: "2026-11-06T07:00:00.000Z",
+};
+
 assert(normalizeTitle("The Hobbit!") === "the hobbit", "trailing punctuation");
-assert(scoreEntry(hobbit, [hobbit, later]).points === 2, "first hobbit scores 2");
+assert(scoreEntry(reading, [reading, libraryBook, ownCopy]).points === 2, "first entry scores 2");
+assert(scoreEntry(libraryBook, [reading, libraryBook, ownCopy]).points === 2, "later library book scores 2");
+assert(scoreEntry(libraryBook, [reading, libraryBook, ownCopy]).showJbn, "library badge");
+assert(scoreEntry(ownCopy, [reading, libraryBook, ownCopy]).points === 1, "later own copy scores 1");
+assert(!scoreEntry(ownCopy, [reading, libraryBook, ownCopy]).showJbn, "own copy has no library badge");
+assert(scoreEntry(hobbit, [hobbit, later]).points === 2, "earliest finished title scores");
 assert(scoreEntry(hobbit, [hobbit, later]).showJbn, "jbn badge");
 assert(scoreEntry(later, [hobbit, later]).points === 0, "duplicate scores 0");
 assert(scoreEntry(later, [hobbit, later]).notCounted, "duplicate labeled");
 assert(scoreEntry(later, [outside, later]).points === 1, "outside window does not consume the title");
-assert(scoreEntry(kick, [kick]).points === 2, "kick-off in window");
-assert(scoreEntry(best, [best]).points === 0, "best book outside its window");
-assert(scoreEntry(best, [best]).reason.includes("outside its date window"), "outside copy");
+const earlier = { ...reading, id: "earlier", createdAt: "2026-11-01T12:00:00.000Z" };
+assert(scoreEntry(kick, [earlier, kick]).points === 2, "later kick-off in window");
+assert(scoreEntry(best, [earlier, best]).points === 0, "later best book outside its window");
+assert(scoreEntry(best, [earlier, best]).reason.includes("outside its date window"), "outside copy");
+assert(scoreEntry(best, [best]).points === 2, "a lone first entry still scores 2");
 
 process.env.BOOKNEST_SQLITE_PATH = path.join(mkdtempSync(path.join(tmpdir(), "bn-")), "test.sqlite");
 delete process.env.DATABASE_URL;
@@ -60,20 +89,11 @@ delete process.env.ADMIN_PASSWORD;
 
 const { loadBoard } = await import("../lib/board.ts");
 const board = await loadBoard();
-const ava = board.pairs.find((pair) => pair.label === "Ava & Leo");
-const mira = board.pairs.find((pair) => pair.label === "Mira & Ned");
-const nia = board.pairs.find((pair) => pair.label === "Nia & Otto");
-assert(ava?.pointsLabel === "5 points (4 read, +1 adjusted)", `ava points ${ava?.pointsLabel}`);
-assert(ava?.notes[0] === "+1 organizer adjustment: Welcome bonus", "welcome bonus");
-assert(mira?.pointsLabel === "2 points", "mira");
-assert(nia?.pointsLabel === "2 points", "nia");
-assert(board.pairs.map((pair) => pair.label).join("|") === "Ava & Leo|Mira & Ned|Nia & Otto", "pair order");
-assert(board.juniors.map((junior) => `${junior.name} ${junior.age} ${junior.points}`).join("|") === "Leo 14 2|Ned 12 2|Otto 12 2", "juniors");
-assert(board.readingNow[0]?.title === "A Wizard of Earthsea", "earthsea");
-assert(board.readingNow[0]?.readerName === "Leo", "read by Leo");
-assert(board.finished[0]?.title === "Pippi Longstocking" && board.finished[0]?.readerName === "Otto", "newest review");
-const duplicate = board.finished.find((entry) => entry.title === "the hobbit");
-assert(duplicate?.score.notCounted && duplicate.score.reason === "This title already counted once for the pair.", "hobbit duplicate copy");
+assert(board.pairs.length === 0, "no sample pairs");
+assert(board.juniors.length === 0, "no sample juniors");
+assert(board.readingNow.length === 0 && board.finished.length === 0, "no sample entries");
+const text = JSON.stringify(board);
+assert(!text.includes("Ava") && !text.includes("Otto") && !text.includes("readtogether"), "sample names gone");
 
 const { readFileSync } = await import("fs");
 const { splitSql } = await import("../lib/db.ts");

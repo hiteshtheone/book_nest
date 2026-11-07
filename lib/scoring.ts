@@ -85,8 +85,23 @@ function zero(reason: string, notCounted = false): Score {
 }
 
 export function scoreEntry(entry: ScoreInput, pairEntries: ScoreInput[]): Score {
+  const earliest = [...pairEntries].sort(byTime)[0];
+  if (earliest && earliest.id === entry.id) {
+    return {
+      points: 2,
+      showJbn: entry.borrowed,
+      notCounted: false,
+      reason: "First entry for the pair. Worth 2 points, once.",
+    };
+  }
+
   if (entry.kind === "currently_reading") {
-    return zero("Say who is reading it. This scores 0 and shows on the public feed.");
+    return {
+      points: 0,
+      showJbn: entry.borrowed,
+      notCounted: false,
+      reason: "Say who is reading it. This scores 0 and shows on the public feed.",
+    };
   }
 
   if (entry.kind === "kickoff") {
@@ -99,7 +114,7 @@ export function scoreEntry(entry: ScoreInput, pairEntries: ScoreInput[]): Score 
     }
     return {
       points: 2,
-      showJbn: false,
+      showJbn: entry.borrowed,
       notCounted: false,
       reason: "Kick-off. 2 points, once per pair.",
     };
@@ -115,7 +130,7 @@ export function scoreEntry(entry: ScoreInput, pairEntries: ScoreInput[]): Score 
     }
     return {
       points: 2,
-      showJbn: false,
+      showJbn: entry.borrowed,
       notCounted: false,
       reason: "Best book. One recommendation per pair, worth 2 points.",
     };
