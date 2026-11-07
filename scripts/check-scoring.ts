@@ -84,6 +84,7 @@ assert(scoreEntry(best, [best]).points === 2, "a lone first entry still scores 2
 
 process.env.VERCEL = "1";
 delete process.env.DATABASE_URL;
+delete process.env.BOOKNEST_SQLITE_PATH;
 const { databaseConfigError } = await import("../lib/config.ts");
 assert(databaseConfigError()?.includes("DATABASE_URL"), "vercel without DATABASE_URL explains the missing variable");
 const { query } = await import("../lib/db.ts");
@@ -98,7 +99,17 @@ assert(
   "vercel does not mkdir a file database",
 );
 delete process.env.VERCEL;
-assert(databaseConfigError() === null, "local file database stays available");
+assert(databaseConfigError()?.includes(".env.local"), "local also requires the Supabase connection string");
+let localOpened: unknown;
+try {
+  await query("select 1");
+} catch (error) {
+  localOpened = error;
+}
+assert(
+  localOpened instanceof Error && localOpened.message.includes("DATABASE_URL"),
+  "local does not create a file database",
+);
 
 process.env.BOOKNEST_SQLITE_PATH = path.join(mkdtempSync(path.join(tmpdir(), "bn-")), "test.sqlite");
 delete process.env.DATABASE_URL;
