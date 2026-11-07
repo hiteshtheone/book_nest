@@ -13,22 +13,19 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-The database starts empty. Choose **Sign up**, enter a name, password, and age, and create a pair by entering your partner’s name. Your partner joins by signing up or signing in with that name. One pair per person.
-
-When `DATABASE_URL` is not set, the app stores data in a SQLite file at `data/booknest.sqlite` and the footer says so. Delete that file to start over.
-
-## Point it at Supabase Postgres
-
-The app reads a Postgres connection string. It does **not** read `SUPABASE_URL`, `SUPABASE_ANON_KEY`, or a service role key.
-
-1. In Supabase, open **Project Settings → Database** and copy the URI.
-2. Put it in `.env.local`:
+Local development uses the same Supabase Postgres database as production. Copy the URI from the Supabase project **book_nest** (**Project Settings → Database**) into `.env.local`:
 
 ```bash
 DATABASE_URL=postgresql://...
 ```
 
-3. Optional organizer, who can add points adjustments:
+The database starts empty. Choose **Sign up**, enter a name, password, and age, and create a pair by entering your partner’s name. Your partner joins by signing up or signing in with that name. One pair per person.
+
+## Supabase Postgres
+
+The app reads a Postgres connection string. It does **not** read `SUPABASE_URL`, `SUPABASE_ANON_KEY`, or a service role key. `DATABASE_URL` is required locally and on Vercel. Without it, pages show a configuration message instead of creating a file database.
+
+Optional organizer, who can add points adjustments:
 
 ```bash
 ADMIN_NAME=your-name
@@ -47,7 +44,7 @@ Set this environment variable on the Vercel project. Do not commit the value.
 
 - `DATABASE_URL` — the Supabase Postgres connection string (Project Settings → Database → URI).
 
-That is the only database variable this app reads. It does not read `SUPABASE_URL`, an anon key, or a service role key. On Vercel the filesystem is read-only, so the app does not create `data/` or a SQLite file. If `DATABASE_URL` is missing there, sign-in shows a configuration message instead of crashing. Local development with no `DATABASE_URL` still uses `data/booknest.sqlite`.
+That is the only database variable this app reads. It does not read `SUPABASE_URL`, an anon key, or a service role key. On Vercel the filesystem is read-only, so the app does not create `data/` or a SQLite file. If `DATABASE_URL` is missing, sign-in shows a configuration message instead of crashing.
 
 ## Scoring
 
