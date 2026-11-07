@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
 import { endSession, getCurrentUser, startSession } from "@/lib/auth";
+import { databaseConfigError } from "@/lib/config";
 import { cleanName, sameName, validName, validPassword } from "@/lib/names";
 import { isKind } from "@/lib/scoring";
 import {
@@ -25,6 +26,7 @@ export type ActionState = { error: string; ok?: boolean };
 
 function knownError(error: unknown): string | null {
   if (!(error instanceof Error)) return null;
+  if (error.message.includes("DATABASE_URL")) return error.message;
   switch (error.message) {
     case "NAME_TAKEN":
       return "That name is already registered. Sign in instead.";
@@ -40,15 +42,23 @@ function knownError(error: unknown): string | null {
 }
 
 export async function signIn(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const config = databaseConfigError();
+  if (config) return { error: config };
   const name = cleanName(String(formData.get("name") ?? ""));
   const password = String(formData.get("password") ?? "");
-  const user = name ? await getUserByName(name) : null;
-  const matches = user ? await bcrypt.compare(password, user.passwordHash) : false;
-  if (!user || !matches) {
-    return { error: "That name and password do not match." };
+  try {
+    const user = name ? await getUserByName(name) : null;
+    const matches = user ? await bcrypt.compare(password, user.passwordHash) : false;
+    if (!user || !matches) {
+      return { error: "That name and password do not match." };
+    }
+    const joined = await claimInviteOnSignIn(user);
+    await startSession(joined.id);
+  } catch (error) {
+    const message = knownError(error);
+    if (message) return { error: message };
+    throw error;
   }
-  const joined = await claimInviteOnSignIn(user);
-  await startSession(joined.id);
   redirect("/dashboard");
 }
 
@@ -72,6 +82,8 @@ export async function signUp(_prev: ActionState, formData: FormData): Promise<Ac
   if (mode !== "create" && mode !== "join") {
     return { error: "Choose whether you are creating or joining a pair." };
   }
+  const config = databaseConfigError();
+  if (config) return { error: config };
 
   let user;
   try {
@@ -97,6 +109,8 @@ export async function signOut(): Promise<void> {
 }
 
 export async function addEntry(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const config = databaseConfigError();
+  if (config) return { error: config };
   const user = await getCurrentUser();
   if (!user) redirect("/sign-in");
   if (!user.pairId) return { error: "Join a pair before adding entries." };
@@ -132,6 +146,7 @@ export async function addEntry(_prev: ActionState, formData: FormData): Promise<
 }
 
 export async function removeEntry(formData: FormData): Promise<void> {
+  if (databaseConfigError()) redirect("/sign-in");
   const user = await getCurrentUser();
   if (!user) redirect("/sign-in");
   const id = String(formData.get("id") ?? "");
@@ -145,6 +160,8 @@ export async function removeEntry(formData: FormData): Promise<void> {
 }
 
 export async function addAdjustment(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const config = databaseConfigError();
+  if (config) return { error: config };
   const user = await getCurrentUser();
   if (!user) redirect("/sign-in");
   if (user.role !== "organizer") return { error: "Only an organizer can add an adjustment." };

@@ -3,8 +3,20 @@ export function databaseUrl(): string | undefined {
   return url ? url : undefined;
 }
 
+export function isVercel(): boolean {
+  return process.env.VERCEL === "1";
+}
+
+export const VERCEL_DATABASE_MESSAGE =
+  "This deployment has no database yet. In the Vercel project settings, set DATABASE_URL to your Supabase Postgres connection string. The file database is only for local development.";
+
+export function databaseConfigError(): string | null {
+  if (isVercel() && !databaseUrl()) return VERCEL_DATABASE_MESSAGE;
+  return null;
+}
+
 export function isFileDatabase(): boolean {
-  return !databaseUrl();
+  return !databaseUrl() && !isVercel();
 }
 
 export function adminName(): string {

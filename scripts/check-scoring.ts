@@ -82,6 +82,24 @@ assert(scoreEntry(best, [earlier, best]).points === 0, "later best book outside 
 assert(scoreEntry(best, [earlier, best]).reason.includes("outside its date window"), "outside copy");
 assert(scoreEntry(best, [best]).points === 2, "a lone first entry still scores 2");
 
+process.env.VERCEL = "1";
+delete process.env.DATABASE_URL;
+const { databaseConfigError } = await import("../lib/config.ts");
+assert(databaseConfigError()?.includes("DATABASE_URL"), "vercel without DATABASE_URL explains the missing variable");
+const { query } = await import("../lib/db.ts");
+let opened: unknown;
+try {
+  await query("select 1");
+} catch (error) {
+  opened = error;
+}
+assert(
+  opened instanceof Error && opened.message.includes("DATABASE_URL") && !opened.message.includes("ENOENT"),
+  "vercel does not mkdir a file database",
+);
+delete process.env.VERCEL;
+assert(databaseConfigError() === null, "local file database stays available");
+
 process.env.BOOKNEST_SQLITE_PATH = path.join(mkdtempSync(path.join(tmpdir(), "bn-")), "test.sqlite");
 delete process.env.DATABASE_URL;
 delete process.env.ADMIN_NAME;

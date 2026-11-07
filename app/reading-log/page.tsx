@@ -5,9 +5,19 @@ import { removeEntry } from "@/app/actions";
 import { getCurrentUser } from "@/lib/auth";
 import { loadPairViews } from "@/lib/board";
 import { formatUtc, kindLabel, scoreEntry } from "@/lib/scoring";
+import { databaseConfigError } from "@/lib/config";
 import { listEntries } from "@/lib/store";
 
 export default async function ReadingLogPage() {
+  const problem = databaseConfigError();
+  if (problem) {
+    return (
+      <main className="wrap">
+        <h1>Reading log</h1>
+        <p className="form-error">{problem}</p>
+      </main>
+    );
+  }
   const user = await getCurrentUser();
   if (!user) redirect("/sign-in");
 
