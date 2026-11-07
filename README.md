@@ -41,6 +41,14 @@ On startup the app applies `supabase/migrations/0001_init.sql` if the tables are
 
 Sessions are an httpOnly cookie backed by a row in `sessions`. Passwords are bcrypt hashes.
 
+## Deploy on Vercel
+
+Set this environment variable on the Vercel project. Do not commit the value.
+
+- `DATABASE_URL` — the Supabase Postgres connection string (Project Settings → Database → URI).
+
+That is the only database variable this app reads. It does not read `SUPABASE_URL`, an anon key, or a service role key. On Vercel the filesystem is read-only, so the app does not create `data/` or a SQLite file. If `DATABASE_URL` is missing there, sign-in shows a configuration message instead of crashing. Local development with no `DATABASE_URL` still uses `data/booknest.sqlite`.
+
 ## Scoring
 
 Windows are UTC calendar dates. Season: **1 Nov 2026 – 31 Dec 2026**.

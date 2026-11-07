@@ -1,8 +1,18 @@
 import { PointsChips } from "@/components/PointsChips";
 import { loadBoard } from "@/lib/board";
+import { databaseConfigError } from "@/lib/config";
 import { formatUtc } from "@/lib/scoring";
 
 export default async function DashboardPage() {
+  const problem = databaseConfigError();
+  if (problem) {
+    return (
+      <main className="wrap">
+        <h1>Dashboard</h1>
+        <p className="form-error">{problem}</p>
+      </main>
+    );
+  }
   const board = await loadBoard();
 
   return (

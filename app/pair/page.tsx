@@ -2,9 +2,19 @@ import { redirect } from "next/navigation";
 import { AdjustmentForm } from "@/components/AdjustmentForm";
 import { getCurrentUser } from "@/lib/auth";
 import { loadPairViews } from "@/lib/board";
+import { databaseConfigError } from "@/lib/config";
 import { adjustmentLine } from "@/lib/scoring";
 
 export default async function PairPage() {
+  const problem = databaseConfigError();
+  if (problem) {
+    return (
+      <main className="wrap">
+        <h1>Pair</h1>
+        <p className="form-error">{problem}</p>
+      </main>
+    );
+  }
   const user = await getCurrentUser();
   if (!user) redirect("/sign-in");
 

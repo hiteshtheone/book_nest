@@ -1,9 +1,11 @@
 import { cookies, headers } from "next/headers";
+import { databaseConfigError } from "./config";
 import { createSession, deleteSession, userForSession, type User } from "./store";
 
 const COOKIE = "bn_session";
 
 export async function getCurrentUser(): Promise<User | null> {
+  if (databaseConfigError()) return null;
   const jar = await cookies();
   const sessionId = jar.get(COOKIE)?.value;
   if (!sessionId) return null;

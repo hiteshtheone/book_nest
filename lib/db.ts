@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { databaseUrl, sqlitePath } from "./config";
+import { databaseConfigError, databaseUrl, sqlitePath } from "./config";
 import { seedIfEmpty } from "./seed";
 
 export type Row = Record<string, unknown>;
@@ -95,9 +95,16 @@ export function splitSql(sql: string): string[] {
 }
 
 async function openSqlite(): Promise<Driver> {
-  const { DatabaseSync } = await import("node:sqlite");
+  const problem = databaseConfigError();
+  if (problem) throw new Error(problem);
   const file = path.resolve(process.cwd(), sqlitePath());
+  if (file.startsWith("/var/task")) {
+    throw new Error(
+      "Refusing to create a file database under /var/task. Set DATABASE_URL to your Supabase Postgres connection string.",
+    );
+  }
   fs.mkdirSync(path.dirname(file), { recursive: true });
+  const { DatabaseSync } = await import("node:sqlite");
   const db = new DatabaseSync(file);
   db.exec("pragma journal_mode = WAL;");
   db.exec("pragma foreign_keys = ON;");
@@ -157,6 +164,8 @@ async function ensureSchema(driver: Driver) {
 }
 
 async function openAndSeed(): Promise<Driver> {
+  const problem = databaseConfigError();
+  if (problem) throw new Error(problem);
   const driver = databaseUrl() ? await openPostgres() : await openSqlite();
   await driver.exec("BEGIN");
   try {
