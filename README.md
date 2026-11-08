@@ -13,22 +13,21 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-The database starts empty. Choose **Sign up**, enter a name, password, and age, and create a pair by entering your partner’s name. Your partner joins by signing up or signing in with that name. One pair per person.
-
-When `DATABASE_URL` is not set, the app stores data in a SQLite file at `data/booknest.sqlite` and the footer says so. Delete that file to start over.
-
-## Point it at Supabase Postgres
-
-The app reads a Postgres connection string. It does **not** read `SUPABASE_URL`, `SUPABASE_ANON_KEY`, or a service role key.
-
-1. In Supabase, open **Project Settings → Database** and copy the URI.
-2. Put it in `.env.local`:
+Local development uses the same Supabase Postgres database as production. In the Supabase project **book_nest**, click **Connect**, choose **Session pooler**, and put that URI in `.env.local`:
 
 ```bash
 DATABASE_URL=postgresql://...
 ```
 
-3. Optional organizer, who can add points adjustments:
+The database starts empty. Choose **Sign up**, enter a name, password, and age, and create a pair by entering your partner’s name. Your partner joins by signing up or signing in with that name. One pair per person.
+
+## Supabase Postgres
+
+The app reads one Postgres connection string. It does **not** read `SUPABASE_URL`, `SUPABASE_ANON_KEY`, or a service role key. `DATABASE_URL` is required locally and on Vercel. Without it, pages show a configuration message instead of creating a file database.
+
+Use the **Session pooler** string, not the direct `db.<project-ref>.supabase.co` string. The direct host is IPv6-only. On an IPv4-only network, including many home connections and Vercel, Node reports `getaddrinfo ENOTFOUND` and sign-in shows that explanation. The pooler host ends in `pooler.supabase.com`, and the username is `postgres.<project-ref>`.
+
+Optional organizer, who can add points adjustments:
 
 ```bash
 ADMIN_NAME=your-name
@@ -45,9 +44,9 @@ Sessions are an httpOnly cookie backed by a row in `sessions`. Passwords are bcr
 
 Set this environment variable on the Vercel project. Do not commit the value.
 
-- `DATABASE_URL` — the Supabase Postgres connection string (Project Settings → Database → URI).
+- `DATABASE_URL` — the Supabase **Session pooler** URI (dashboard → Connect → Session pooler).
 
-That is the only database variable this app reads. It does not read `SUPABASE_URL`, an anon key, or a service role key. On Vercel the filesystem is read-only, so the app does not create `data/` or a SQLite file. If `DATABASE_URL` is missing there, sign-in shows a configuration message instead of crashing. Local development with no `DATABASE_URL` still uses `data/booknest.sqlite`.
+That is the only database variable this app reads. It does not read `SUPABASE_URL`, an anon key, or a service role key. On Vercel the filesystem is read-only, so the app does not create `data/` or a SQLite file. If `DATABASE_URL` is missing, sign-in shows a configuration message instead of crashing.
 
 ## Scoring
 

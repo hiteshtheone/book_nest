@@ -1,10 +1,10 @@
 import { redirect } from "next/navigation";
 import { SignUpForm } from "@/components/AuthForms";
 import { getCurrentUser } from "@/lib/auth";
-import { databaseConfigError } from "@/lib/config";
+import { databaseProblem } from "@/lib/db";
 
 export default async function SignUpPage() {
-  const problem = databaseConfigError();
+  const problem = await databaseProblem();
   if (!problem && (await getCurrentUser())) redirect("/dashboard");
   return (
     <main className="wrap">

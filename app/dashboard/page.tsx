@@ -1,10 +1,10 @@
 import { PointsChips } from "@/components/PointsChips";
 import { loadBoard } from "@/lib/board";
-import { databaseConfigError } from "@/lib/config";
+import { databaseProblem } from "@/lib/db";
 import { formatUtc } from "@/lib/scoring";
 
 export default async function DashboardPage() {
-  const problem = databaseConfigError();
+  const problem = await databaseProblem();
   if (problem) {
     return (
       <main className="wrap">

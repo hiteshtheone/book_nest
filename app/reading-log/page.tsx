@@ -5,11 +5,11 @@ import { removeEntry } from "@/app/actions";
 import { getCurrentUser } from "@/lib/auth";
 import { loadPairViews } from "@/lib/board";
 import { formatUtc, kindLabel, scoreEntry } from "@/lib/scoring";
-import { databaseConfigError } from "@/lib/config";
+import { databaseProblem } from "@/lib/db";
 import { listEntries } from "@/lib/store";
 
 export default async function ReadingLogPage() {
-  const problem = databaseConfigError();
+  const problem = await databaseProblem();
   if (problem) {
     return (
       <main className="wrap">
