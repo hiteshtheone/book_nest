@@ -6,10 +6,14 @@ const COOKIE = "bn_session";
 
 export async function getCurrentUser(): Promise<User | null> {
   if (databaseConfigError()) return null;
-  const jar = await cookies();
-  const sessionId = jar.get(COOKIE)?.value;
-  if (!sessionId) return null;
-  return userForSession(sessionId);
+  try {
+    const jar = await cookies();
+    const sessionId = jar.get(COOKIE)?.value;
+    if (!sessionId) return null;
+    return await userForSession(sessionId);
+  } catch {
+    return null;
+  }
 }
 
 export async function startSession(userId: string): Promise<void> {

@@ -42,3 +42,22 @@ export function sqlitePath(): string {
   if (!file) throw new Error(MISSING_DATABASE_MESSAGE);
   return file;
 }
+
+export function databaseHost(url = databaseUrl()): string | null {
+  if (!url) return null;
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return null;
+  }
+}
+
+export function directSupabaseRef(hostname: string | null): string | null {
+  if (!hostname) return null;
+  const match = /^db\.([a-z0-9]+)\.supabase\.co$/i.exec(hostname);
+  return match?.[1] ?? null;
+}
+
+export function directHostUnreachableMessage(ref: string): string {
+  return `The database host db.${ref}.supabase.co is IPv6-only, so this network reports getaddrinfo ENOTFOUND. In Supabase, click Connect, choose Session pooler, and put that URI in DATABASE_URL. Locally it goes in .env.local. Use the same Session pooler string on Vercel. The username is postgres.${ref} and the host ends in pooler.supabase.com.`;
+}

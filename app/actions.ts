@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
 import { endSession, getCurrentUser, startSession } from "@/lib/auth";
-import { databaseConfigError } from "@/lib/config";
+import { databaseProblem } from "@/lib/db";
 import { cleanName, sameName, validName, validPassword } from "@/lib/names";
 import { isKind } from "@/lib/scoring";
 import {
@@ -26,7 +26,7 @@ export type ActionState = { error: string; ok?: boolean };
 
 function knownError(error: unknown): string | null {
   if (!(error instanceof Error)) return null;
-  if (error.message.includes("DATABASE_URL")) return error.message;
+  if (error.message.includes("DATABASE_URL") || error.message.includes("Session pooler")) return error.message;
   switch (error.message) {
     case "NAME_TAKEN":
       return "That name is already registered. Sign in instead.";
@@ -42,7 +42,7 @@ function knownError(error: unknown): string | null {
 }
 
 export async function signIn(_prev: ActionState, formData: FormData): Promise<ActionState> {
-  const config = databaseConfigError();
+  const config = await databaseProblem();
   if (config) return { error: config };
   const name = cleanName(String(formData.get("name") ?? ""));
   const password = String(formData.get("password") ?? "");
@@ -82,7 +82,7 @@ export async function signUp(_prev: ActionState, formData: FormData): Promise<Ac
   if (mode !== "create" && mode !== "join") {
     return { error: "Choose whether you are creating or joining a pair." };
   }
-  const config = databaseConfigError();
+  const config = await databaseProblem();
   if (config) return { error: config };
 
   let user;
@@ -109,7 +109,7 @@ export async function signOut(): Promise<void> {
 }
 
 export async function addEntry(_prev: ActionState, formData: FormData): Promise<ActionState> {
-  const config = databaseConfigError();
+  const config = await databaseProblem();
   if (config) return { error: config };
   const user = await getCurrentUser();
   if (!user) redirect("/sign-in");
@@ -146,7 +146,7 @@ export async function addEntry(_prev: ActionState, formData: FormData): Promise<
 }
 
 export async function removeEntry(formData: FormData): Promise<void> {
-  if (databaseConfigError()) redirect("/sign-in");
+  if (await databaseProblem()) redirect("/sign-in");
   const user = await getCurrentUser();
   if (!user) redirect("/sign-in");
   const id = String(formData.get("id") ?? "");
@@ -160,7 +160,7 @@ export async function removeEntry(formData: FormData): Promise<void> {
 }
 
 export async function addAdjustment(_prev: ActionState, formData: FormData): Promise<ActionState> {
-  const config = databaseConfigError();
+  const config = await databaseProblem();
   if (config) return { error: config };
   const user = await getCurrentUser();
   if (!user) redirect("/sign-in");

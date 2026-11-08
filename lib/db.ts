@@ -1,6 +1,14 @@
+import dns from "dns/promises";
 import fs from "fs";
 import path from "path";
-import { databaseConfigError, databaseUrl, sqlitePath } from "./config";
+import {
+  databaseConfigError,
+  databaseHost,
+  databaseUrl,
+  directHostUnreachableMessage,
+  directSupabaseRef,
+  sqlitePath,
+} from "./config";
 import { seedIfEmpty } from "./seed";
 
 export type Row = Record<string, unknown>;
@@ -127,15 +135,52 @@ async function openSqlite(): Promise<Driver> {
   };
 }
 
+function missingAddress(error: unknown): boolean {
+  const code = error && typeof error === "object" && "code" in error ? String((error as { code: unknown }).code) : "";
+  return code === "ENOTFOUND" || code === "ENODATA";
+}
+
+async function assertDirectHostReachable(url: string): Promise<void> {
+  const hostname = databaseHost(url);
+  const ref = directSupabaseRef(hostname);
+  if (!hostname || !ref) return;
+  try {
+    const v4 = await dns.resolve4(hostname);
+    if (v4.length > 0) return;
+  } catch (error) {
+    if (!missingAddress(error)) throw error;
+  }
+  try {
+    await dns.lookup(hostname);
+  } catch (error) {
+    if (missingAddress(error)) throw new Error(directHostUnreachableMessage(ref));
+    throw error;
+  }
+}
+
 async function openPostgres(): Promise<Driver> {
   const { Pool } = await import("pg");
   const url = databaseUrl()!;
+  await assertDirectHostReachable(url);
   const local = /localhost|127\.0\.0\.1/.test(url);
   const pool = new Pool({
     connectionString: url,
     ssl: local ? undefined : { rejectUnauthorized: false },
+    max: 1,
+    connectionTimeoutMillis: 10000,
   });
-  const client = await pool.connect();
+  let client;
+  try {
+    client = await pool.connect();
+  } catch (error) {
+    const ref = directSupabaseRef(databaseHost(url));
+    const code = error && typeof error === "object" && "code" in error ? String((error as { code: unknown }).code) : "";
+    const message = error instanceof Error ? error.message : "";
+    if (ref && (code === "ENOTFOUND" || message.includes("ENOTFOUND") || code === "ENETUNREACH")) {
+      throw new Error(directHostUnreachableMessage(ref));
+    }
+    throw error;
+  }
   return {
     file: false,
     async exec(sql: string) {
@@ -206,6 +251,17 @@ function enqueue<T>(fn: () => Promise<T>): Promise<T> {
 
 export function sqlBool(value: boolean): boolean | number {
   return databaseUrl() ? value : value ? 1 : 0;
+}
+
+export async function databaseProblem(): Promise<string | null> {
+  const config = databaseConfigError();
+  if (config) return config;
+  try {
+    await query("select 1");
+    return null;
+  } catch (error) {
+    return error instanceof Error ? error.message : "Could not connect to the database.";
+  }
 }
 
 export function query(sql: string, params: unknown[] = []): Promise<Row[]> {

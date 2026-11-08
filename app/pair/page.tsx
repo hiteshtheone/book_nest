@@ -2,11 +2,11 @@ import { redirect } from "next/navigation";
 import { AdjustmentForm } from "@/components/AdjustmentForm";
 import { getCurrentUser } from "@/lib/auth";
 import { loadPairViews } from "@/lib/board";
-import { databaseConfigError } from "@/lib/config";
+import { databaseProblem } from "@/lib/db";
 import { adjustmentLine } from "@/lib/scoring";
 
 export default async function PairPage() {
-  const problem = databaseConfigError();
+  const problem = await databaseProblem();
   if (problem) {
     return (
       <main className="wrap">
