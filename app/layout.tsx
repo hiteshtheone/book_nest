@@ -30,7 +30,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="en">
       <body className={`${fraunces.variable} ${sourceSans.variable}`}>
-        <Header user={user ? { name: user.name } : null} />
+        <Header user={user ? { name: user.name, age: user.age } : null} />
         {children}
         <Footer fileDatabase={isFileDatabase()} />
       </body>

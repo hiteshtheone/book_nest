@@ -4,6 +4,7 @@ import { PointsChips } from "@/components/PointsChips";
 import { removeEntry } from "@/app/actions";
 import { getCurrentUser } from "@/lib/auth";
 import { loadPairViews } from "@/lib/board";
+import { nameWithAge, sameName } from "@/lib/names";
 import { formatUtc, kindLabel, scoreEntry } from "@/lib/scoring";
 import { databaseProblem } from "@/lib/db";
 import { listEntries } from "@/lib/store";
@@ -55,8 +56,10 @@ export default async function ReadingLogPage() {
                   {kindLabel(entry.kind)} · {formatUtc(entry.createdAt)}
                 </p>
                 <h3>{entry.title}</h3>
-                {entry.body ? <p className="review">{entry.body}</p> : null}
-                <p className="who-line">{entry.readerName}</p>
+                {entry.kind !== "currently_reading" && entry.body ? <p className="review">{entry.body}</p> : null}
+                <p className="who-line">
+                  {nameWithAge(entry.readerName, pair.members.find((member) => sameName(member.name, entry.readerName))?.age)}
+                </p>
                 <PointsChips score={entry.score} />
                 <p className="reason">{entry.score.reason}</p>
                 <form action={removeEntry}>

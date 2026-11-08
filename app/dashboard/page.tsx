@@ -1,6 +1,7 @@
 import { PointsChips } from "@/components/PointsChips";
 import { loadBoard } from "@/lib/board";
 import { databaseProblem } from "@/lib/db";
+import { nameWithAge } from "@/lib/names";
 import { formatUtc } from "@/lib/scoring";
 
 export default async function DashboardPage() {
@@ -32,7 +33,7 @@ export default async function DashboardPage() {
                   {entry.pairName} · {formatUtc(entry.createdAt)}
                 </p>
                 <h3>{entry.title}</h3>
-                <p>Being read by {entry.readerName}</p>
+                <p>Being read by {nameWithAge(entry.readerName, entry.readerAge)}</p>
               </article>
             ))}
           </div>
@@ -43,7 +44,7 @@ export default async function DashboardPage() {
             {board.finished.map((entry) => (
               <article className="card feed-card" key={entry.id}>
                 <p className="meta">
-                  {entry.pairName} · {entry.readerName} · {formatUtc(entry.createdAt)}
+                  {entry.pairName} · {nameWithAge(entry.readerName, entry.readerAge)} · {formatUtc(entry.createdAt)}
                 </p>
                 <h3>{entry.title}</h3>
                 {entry.body ? <p className="review">{entry.body}</p> : null}
@@ -86,7 +87,7 @@ export default async function DashboardPage() {
                   <span className="rank">{index + 1}</span>
                   <div>
                     <div className="rank-name">
-                      {junior.name}, {junior.age}
+                      {nameWithAge(junior.name, junior.age)}
                     </div>
                     <div className="rank-sub">{junior.pairName}</div>
                     <div className="rank-points">{junior.pointsLabel}</div>

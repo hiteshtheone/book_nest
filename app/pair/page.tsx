@@ -3,6 +3,7 @@ import { AdjustmentForm } from "@/components/AdjustmentForm";
 import { getCurrentUser } from "@/lib/auth";
 import { loadPairViews } from "@/lib/board";
 import { databaseProblem } from "@/lib/db";
+import { nameWithAge } from "@/lib/names";
 import { adjustmentLine } from "@/lib/scoring";
 
 export default async function PairPage() {
@@ -42,8 +43,7 @@ export default async function PairPage() {
               <ul className="member-list">
                 {pair.members.map((member) => (
                   <li key={member.id}>
-                    <strong>{member.name}</strong>
-                    {member.age === null ? "" : ` · ${member.age}`}
+                    <strong>{nameWithAge(member.name, member.age)}</strong>
                   </li>
                 ))}
               </ul>

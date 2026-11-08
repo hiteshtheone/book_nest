@@ -15,3 +15,9 @@ export function validName(input: string): boolean {
 export function validPassword(input: string): boolean {
   return input.length >= 4 && input.length <= 200;
 }
+
+/** Age appears beside a name only when the person is under 18. */
+export function nameWithAge(name: string, age: number | null | undefined): string {
+  if (typeof age === "number" && age < 18) return `${name}, ${age}`;
+  return name;
+}
