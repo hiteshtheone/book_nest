@@ -1,9 +1,11 @@
+import { nameWithAge } from "./names";
 import {
   listAdjustments,
   listEntries,
   listPairs,
   listUsers,
   membersOf,
+  readerMatchesMember,
   type Adjustment,
   type Entry,
   type User,
@@ -19,7 +21,7 @@ import {
   type ScoreInput,
 } from "./scoring";
 
-export type ScoredEntry = Entry & { score: Score; pairName: string };
+export type ScoredEntry = Entry & { score: Score; pairName: string; readerAge: number | null };
 
 export type Standing = {
   id: string;
@@ -68,15 +70,20 @@ export async function loadBoard(): Promise<Board> {
   const nameByPair = new Map<string, string>();
   for (const pair of pairs) {
     const members = membersOf(users, pair.id);
-    nameByPair.set(pair.id, pairLabel(members.map((member) => member.name), pair.pendingPartnerName));
+    nameByPair.set(
+      pair.id,
+      pairLabel(members.map((member) => nameWithAge(member.name, member.age)), pair.pendingPartnerName),
+    );
   }
 
   const scored: ScoredEntry[] = entries.map((entry) => {
     const pairEntries = entries.filter((item) => item.pairId === entry.pairId).map(toScoreInput);
+    const reader = readerMatchesMember(membersOf(users, entry.pairId), entry.readerName);
     return {
       ...entry,
       score: scoreEntry(toScoreInput(entry), pairEntries),
       pairName: nameByPair.get(entry.pairId) ?? "Pair",
+      readerAge: reader?.age ?? null,
     };
   });
 
@@ -152,7 +159,7 @@ export async function loadPairViews(): Promise<PairView[]> {
     const adjusted = pairAdjustments.reduce((sum, item) => sum + item.points, 0);
     return {
       id: pair.id,
-      label: pairLabel(members.map((member) => member.name), pair.pendingPartnerName),
+      label: pairLabel(members.map((member) => nameWithAge(member.name, member.age)), pair.pendingPartnerName),
       pendingPartnerName: pair.pendingPartnerName,
       members,
       adjustments: pairAdjustments,

@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "@/app/actions";
+import { nameWithAge } from "@/lib/names";
 
-type Viewer = { name: string } | null;
+type Viewer = { name: string; age: number | null } | null;
 
 const signedOut = [
   { href: "/", label: "Home" },
@@ -61,7 +62,7 @@ export function Header({ user }: { user: Viewer }) {
         </nav>
         {user ? (
           <div className="header-end">
-            <span className="whoami">{user.name}</span>
+            <span className="whoami">{nameWithAge(user.name, user.age)}</span>
             <form action={signOut}>
               <button className="sign-out" type="submit">
                 Sign out

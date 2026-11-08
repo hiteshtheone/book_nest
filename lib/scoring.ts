@@ -64,7 +64,7 @@ export function kindLabel(kind: Kind): string {
     case "kickoff":
       return "Kick-off";
     case "finished":
-      return "Finished";
+      return "Finished Book";
     case "best":
       return "Best book";
   }

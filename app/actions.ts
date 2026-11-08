@@ -120,8 +120,10 @@ export async function addEntry(_prev: ActionState, formData: FormData): Promise<
   const title = String(formData.get("title") ?? "").trim();
   if (!title) return { error: "Enter a title." };
   if (title.length > 300) return { error: "That title is too long." };
-  const body = String(formData.get("body") ?? "").replace(/\r\n/g, "\n").trim();
-  if (kindRaw !== "currently_reading" && !body) return { error: "Add a few words." };
+  const rawBody = String(formData.get("body") ?? "").replace(/\r\n/g, "\n").trim();
+  const body = kindRaw === "currently_reading" ? "" : rawBody;
+  if (kindRaw === "finished" && !body) return { error: "Add a review." };
+  if (kindRaw !== "currently_reading" && kindRaw !== "finished" && !body) return { error: "Add a few words." };
   if (body.length > 4000) return { error: "That note is too long." };
 
   const who = cleanName(String(formData.get("who") ?? ""));

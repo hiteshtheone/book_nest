@@ -1,46 +1,56 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { addEntry, type ActionState } from "@/app/actions";
-import type { Kind } from "@/lib/scoring";
 
-const hints: Record<Kind, string> = {
+const hints = {
   currently_reading: "Say who is reading it. After the pair’s first entry, this scores 0 and shows on the public feed.",
-  kickoff: "An intro plus the books you are starting. 2 points, once per pair, 1–8 Nov 2026 (UTC).",
   finished: "A 2–5 line review. 1 point, or 2 when it is from the Jade Book Nest library.",
-  best: "One recommendation per pair, worth 2 points, 25–31 Dec 2026 (UTC).",
-};
+} as const;
+
+type LogKind = keyof typeof hints;
 
 const initial: ActionState = { error: "" };
 
 export function AddEntryForm({ defaultWho }: { defaultWho: string }) {
   const [state, action, pending] = useActionState(addEntry, initial);
-  const [kind, setKind] = useState<Kind>("currently_reading");
+  const [kind, setKind] = useState<LogKind>("currently_reading");
+
+  useEffect(() => {
+    if (state.ok) setKind("currently_reading");
+  }, [state]);
 
   return (
     <form action={action}>
       {state.error ? <p className="form-error">{state.error}</p> : null}
       <label className="field">
         <span>Kind</span>
-        <select name="kind" value={kind} onChange={(event) => setKind(event.target.value as Kind)}>
+        <select
+          name="kind"
+          value={kind}
+          onChange={(event) => {
+            const next = event.target.value;
+            if (next === "currently_reading" || next === "finished") setKind(next);
+          }}
+        >
           <option value="currently_reading">Currently reading</option>
-          <option value="kickoff">Kick-off</option>
-          <option value="finished">Finished book</option>
-          <option value="best">Best book</option>
+          <option value="finished">Finished Book</option>
         </select>
       </label>
       <label className="field">
-        <span>Title or starting books</span>
+        <span>Title</span>
         <textarea name="title" rows={3} placeholder="Book title" required />
       </label>
       <label className="field">
         <span>Who</span>
         <input name="who" defaultValue={defaultWho} autoComplete="off" required />
       </label>
-      <label className="field">
-        <span>Words</span>
-        <textarea name="body" className="words" rows={4} required={kind !== "currently_reading"} />
-      </label>
+      {kind === "finished" ? (
+        <label className="field">
+          <span>Review</span>
+          <textarea name="body" rows={4} required />
+        </label>
+      ) : null}
       <label className="check">
         <input type="checkbox" name="borrowed" />
         <span>From the Jade Book Nest library</span>

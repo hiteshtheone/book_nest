@@ -371,8 +371,6 @@ h1 {
 
 .field textarea { resize: vertical; min-height: 74px; }
 
-.field textarea.words { min-height: 112px; }
-
 .field select {
   appearance: none;
   background-image: linear-gradient(45deg, transparent 50%, #3d3832 50%), linear-gradient(135deg, #3d3832 50%, transparent 50%);
